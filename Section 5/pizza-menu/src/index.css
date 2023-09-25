@@ -60,11 +60,12 @@ body {
   width: 12rem;
   background-color: #edc84b;
   position: absolute;
-  top: calc(50% - 1px);
+  top: calc(55% - 1px);
 }
 
 .header h1::before {
   left: 0;
+  bottom: 20px;
 }
 
 .header h1::after {
