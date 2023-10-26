@@ -1,87 +1,44 @@
-  import { useState } from "react";
-  const initialItems = [
-    { id: 1, description: "Passports", quantity: 2, packed: false },
-    { id: 2, description: "Socks", quantity: 12, packed: true },
-  ];
+import { useState } from "react";
+import Logo from "./Logo";
+import Form from "./Form";
+import PackingList from "./PackageList";
+import Stats from "./Stats";
 
-  export default function App() {
-    return (
-      <div className="app">
-        <Logo />
-        <Form />
-        <PackingList />
-        <Stats />
-      </div>
-    );
+export default function App() {
+  const [items, setItems] = useState([]);
+
+  function handleItems(item) {
+    setItems((items) => [...items, item]);
   }
 
-  function Logo() {
-    return <h1>🏝️ Far Away 🧳</h1>;
+  function handleDelete(id) {
+    setItems((items) => items.filter((item) => item.id !== id));
   }
-
-  function Form() {
-    const [description, setDescription] = useState("");
-    const [quantity, setQuantity] = useState(10);
-    function handleSubmit(e) {
-      e.preventDefault();
-      const newItem = {
-        description,
-        quantity,
-        package: false,
-        id: Date.now(),
-      };
-      setDescription("");
-      setQuantity(1);
-    }
-    return (
-      <form className="add-form" onSubmit={handleSubmit}>
-        <h3>What do you need for your 😍trip</h3>
-        <select
-          value={quantity}
-          onChange={(e) => setQuantity(Number(e.target.value))}
-        >
-          {Array.from({ length: 20 }, (_, i) => i + 1).map((num) => (
-            <option value={num} key={num}>
-              {num}
-            </option>
-          ))}
-        </select>
-        <input
-          type="text"
-          placeholder="Item..."
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        ></input>
-        <button>Add</button>
-      </form>
-    );
-  }
-  function PackingList() {
-    return (
-      <div className="list">
-        <ul>
-          {initialItems.map((item) => (
-            <Item item={item} key={item.id} />
-          ))}
-        </ul>
-      </div>
+  function handleToggleItem(id) {
+    setItems((items) =>
+      items.map((item) =>
+        item.id === id ? { ...item, packed: !item.packed } : item
+      )
     );
   }
 
-  function Item({ item }) {
-    return (
-      <li>
-        <span style={item.packed ? { textDecoration: "line-through" } : {}}>
-          {item.quantity} {item.description}
-        </span>
-        <button>❌</button>
-      </li>
+  function handleClearList() {
+    const confirmed = window.confirm(
+      "Are you sure you want to deleted all items?"
     );
+    if (confirmed) setItems([]);
   }
-  function Stats() {
-    return (
-      <footer className="stats">
-        <em>🧳 You have X items on your list, and you already packed X (X%)</em>
-      </footer>
-    );
-  }
+  return (
+    <div className="app">
+      <Logo />
+      <Form onAddItem={handleItems} />
+      <PackingList
+        items={items}
+        onDeleteItem={handleDelete}
+        onToggleItems={handleToggleItem}
+        onClearList={handleClearList}
+      />
+      <Stats items={items} />
+    </div>
+  );
+}
