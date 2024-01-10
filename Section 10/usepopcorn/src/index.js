@@ -9,7 +9,7 @@ function Test() {
   return (
     <div>
       <StartRating color="blue" maxRating={10} onSetRating={setMovieRating} />
-      <p>This is the movie rate {movieRating}</p>
+      <p>Test</p>
     </div>
   );
 }
