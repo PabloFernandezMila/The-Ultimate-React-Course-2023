@@ -39,35 +39,28 @@ function TextExpander({
   children,
   expanded,
   className,
-  collapsedNumWords,
-  expandButtonText,
-  collapseButtonText,
-  buttonColor,
+  collapsedNumWords = 10,
+  expandButtonText = "Show more",
+  collapseButtonText = "Show less",
+  buttonColor = "darkblue",
 }) {
   const [isExpanded, setIsExpanded] = useState(expanded);
   function toggleExpanded() {
     setIsExpanded(!isExpanded);
   }
-
-  const collapsedText = truncateText(
-    children,
-    collapsedNumWords ? collapsedNumWords : 10
-  );
+  const collapsedText = truncateText(children, collapsedNumWords);
+ 
   return (
     <div className={className}>
       {isExpanded ? children : collapsedText}
       <span>
         <button
           style={{
-            color: buttonColor ? buttonColor : "darkblue",
+            color: buttonColor,
           }}
           onClick={() => toggleExpanded()}
         >
-          {isExpanded
-            ? `${collapseButtonText ? collapseButtonText : "Show less"}`
-            : expandButtonText
-            ? expandButtonText
-            : "Show more"}
+          {isExpanded ? `${collapseButtonText}` : expandButtonText}
         </button>
       </span>
     </div>
@@ -76,9 +69,6 @@ function TextExpander({
 
 function truncateText(text, wordCount) {
   const words = text.split(" ");
-  if (words.length <= wordCount) {
-    return text;
-  }
   const truncatedWords = words.slice(0, wordCount);
   return truncatedWords.join(" ") + "...";
 }
