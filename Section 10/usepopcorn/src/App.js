@@ -51,6 +51,7 @@ const tempWatchedData = [
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 const KEY = "bcabee63";
+
 export default function App() {
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState([]);
@@ -77,12 +78,14 @@ export default function App() {
 
   useEffect(
     function () {
+      const controller = new AbortController();
       async function fetchMovies() {
         try {
           setIsLoading(true);
           setError("");
           const res = await fetch(
-            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
+            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
+            { signal: controller.signal }
           );
 
           if (!res.ok)
@@ -91,9 +94,11 @@ export default function App() {
           const data = await res.json();
           if (data.Response === "False") throw new Error("No results found");
           setMovies(data.Search);
+          setError("");
         } catch (err) {
-          console.log(err.message);
-          setError(err.message);
+          if (err.name !== "AbortError") {
+            setError(err.message);
+          }
         } finally {
           setIsLoading(false);
         }
@@ -104,7 +109,11 @@ export default function App() {
           return;
         }
       }
+      handleOnCloseMovie();
       fetchMovies();
+      return function () {
+        controller.abort();
+      };
     },
     [query]
   );
@@ -288,7 +297,6 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
           if (data.Response === "False") throw new Error("No results found");
           setMovie(data);
         } catch (err) {
-          console.log(err.message);
           setError(err.message);
         } finally {
           setIsLoading(false);
@@ -297,6 +305,36 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
       getMovieDetails();
     },
     [selectedId]
+  );
+
+  useEffect(
+    function () {
+      document.title = title ? `Movie | ${title}` : "Loading...";
+
+      // useEffect clean up
+      return function () {
+        document.title = "usePopcorn";
+      };
+    },
+
+    [title]
+  );
+
+  useEffect(
+    function () {
+      function callback(e) {
+        document.addEventListener("keydown", function (e) {
+          if (e.code === "Escape") {
+            onCloseMovie();
+          }
+        });
+      }
+
+      return function () {
+        document.addEventListener("keydown", callback);
+      };
+    },
+    [onCloseMovie]
   );
   return (
     <div className="details">
